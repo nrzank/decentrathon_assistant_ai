@@ -1,9 +1,12 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .models import ExternalSource, Subject, Answer, Question
+
+from .external_services import search_gemini, search_wikipedia
+from .models import ExternalSource, Subject, Answer, Question, SearchHistory
 from .request_gemini import get_answer_from_gemini
 from .agent import Agent
 from .serializers import SubjectSerializer, QuestionSerializer, AnswerSerializer
+from .services import generate_recommendations
 
 # Инициализируем агента
 agent = Agent()
@@ -15,21 +18,19 @@ class ClassifyAndAnswerView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         question = request.GET.get('question')
 
-        # Проверка, что вопрос передан
+
         if not question:
             return Response({'error': 'Question parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Предполагаем, что модель уже обучена на примерах
         predicted_subject = agent.predict(question)
 
-        # Проверяем, есть ли ответ в нашей базе
         subject = Subject.objects.filter(name=predicted_subject).first()
 
         if subject:
             serializer = SubjectSerializer(subject)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            # Иначе ищем ответ через Gemini API
+
             gemini_source = ExternalSource.objects.get(name="Gemini")
             answer = get_answer_from_gemini(question, gemini_source.api_url, gemini_source.api_key)
 
@@ -50,7 +51,7 @@ class TrainModelView(generics.GenericAPIView):
         if not questions or not labels:
             return Response({'error': 'Both questions and labels are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Обучаем модель на предоставленных данных
+
         agent.train(questions, labels)
 
         return Response({'message': 'Model trained successfully'}, status=status.HTTP_200_OK)
@@ -83,6 +84,8 @@ class QuestionListView(generics.ListCreateAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
 
+
+
 class QuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     View для получения, обновления или удаления конкретного вопроса.
@@ -90,4 +93,49 @@ class QuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
 
+
+class HybridSearchView(generics.GenericAPIView):
+    def get(self, request):
+        query = request.query_params.get('query')
+        if not query:
+            return Response({'error': 'Query parameter is required'}, status=400)
+
+        gemini_result = search_gemini(query)
+        wikipedia_result = search_wikipedia(query)
+
+        combined_result = {
+            'gemini': gemini_result,
+            'wikipedia': wikipedia_result
+        }
+
+
+        SearchHistory.objects.create(
+            user=request.user,
+            query=query,
+            response=combined_result
+        )
+
+        return Response(combined_result)
+
+
+
+
+class RecommendationView(generics.GenericAPIView):
+    def get(self, request):
+        recommendations = generate_recommendations(request.user)
+        return Response({'recommendations': recommendations})
+
+
+
+class CalendarReminderView(generics.GenericAPIView):
+    def post(self, request):
+        summary = request.data.get('summary')
+        start_time = request.data.get('start_time')
+        end_time = request.data.get('end_time')
+
+        if not summary or not start_time or not end_time:
+            return Response({'error': 'Missing required fields'}, status=400)
+
+        event = create_calendar_event(summary, start_time, end_time)
+        return Response({'event_id': event.get('id')})
 

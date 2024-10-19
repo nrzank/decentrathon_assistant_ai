@@ -7,7 +7,6 @@ from authorization.managers import UserManager
 
 class User(AbstractBaseUser, PermissionsMixin):
 
-
     username = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)

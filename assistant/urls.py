@@ -16,6 +16,6 @@ urlpatterns = [
     path('subjects/<int:pk>/', SubjectDetailView.as_view(), name='subject_detail'),
     path('answers/', AnswerCreateView.as_view(), name='answer_create'),
     path('questions/', QuestionListView.as_view(), name='question_list'),
-    path('questions/<int:pk>/', QuestionDetailView.as_view(), name='question_detail'),
+    path('questions/<int:pk>/', QuestionDetailView.as_view(), name='question_detail')
 ]
 

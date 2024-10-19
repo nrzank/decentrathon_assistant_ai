@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 
 
@@ -74,3 +75,23 @@ class AgentLog(models.Model):
 
     def __str__(self):
         return f'Log for: {self.agent_name} on {self.question.text[:50]}'
+
+
+class SearchHistory(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    query = models.CharField(max_length=255)
+    response = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.query}"
+
+
+class Recommendation(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    recommended_queries = models.TextField()
+
+    def __str__(self):
+        return f"Recommendations for {self.user.username}"
+
+
