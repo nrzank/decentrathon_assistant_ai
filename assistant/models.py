@@ -7,7 +7,7 @@ from django.db import models
 
 class Subject(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    description = models.TextField()
+    description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -21,7 +21,7 @@ class Subject(models.Model):
 class Topic(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    details = models.TextField()
+    details = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -93,5 +93,7 @@ class Recommendation(models.Model):
 
     def __str__(self):
         return f"Recommendations for {self.user.username}"
+
+
 
 

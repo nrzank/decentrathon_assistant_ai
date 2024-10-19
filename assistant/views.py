@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 
+from .calendar import create_calendar_event
 from .external_services import search_gemini, search_wikipedia
 from .models import ExternalSource, Subject, Answer, Question, SearchHistory
 from .request_gemini import get_answer_from_gemini
@@ -11,13 +12,14 @@ from .services import generate_recommendations
 # Инициализируем агента
 agent = Agent()
 
+
 class ClassifyAndAnswerView(generics.GenericAPIView):
     """
     View для классификации вопроса и получения ответа.
     """
+
     def get(self, request, *args, **kwargs):
         question = request.GET.get('question')
-
 
         if not question:
             return Response({'error': 'Question parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -39,10 +41,12 @@ class ClassifyAndAnswerView(generics.GenericAPIView):
             else:
                 return Response({'error': 'Answer not found'}, status=status.HTTP_404_NOT_FOUND)
 
+
 class TrainModelView(generics.GenericAPIView):
     """
     View для обучения модели.
     """
+
     def post(self, request, *args, **kwargs):
         # Ожидаем данные для обучения
         questions = request.data.get('questions')
@@ -51,10 +55,10 @@ class TrainModelView(generics.GenericAPIView):
         if not questions or not labels:
             return Response({'error': 'Both questions and labels are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-
         agent.train(questions, labels)
 
         return Response({'message': 'Model trained successfully'}, status=status.HTTP_200_OK)
+
 
 class SubjectListView(generics.ListCreateAPIView):
     """
@@ -63,12 +67,14 @@ class SubjectListView(generics.ListCreateAPIView):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
 
+
 class SubjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     View для получения, обновления или удаления конкретного предмета.
     """
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
+
 
 class AnswerCreateView(generics.CreateAPIView):
     """
@@ -77,13 +83,13 @@ class AnswerCreateView(generics.CreateAPIView):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
 
+
 class QuestionListView(generics.ListCreateAPIView):
     """
     View для получения списка вопросов и создания новых вопросов.
     """
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-
 
 
 class QuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -108,7 +114,6 @@ class HybridSearchView(generics.GenericAPIView):
             'wikipedia': wikipedia_result
         }
 
-
         SearchHistory.objects.create(
             user=request.user,
             query=query,
@@ -118,13 +123,10 @@ class HybridSearchView(generics.GenericAPIView):
         return Response(combined_result)
 
 
-
-
 class RecommendationView(generics.GenericAPIView):
     def get(self, request):
         recommendations = generate_recommendations(request.user)
         return Response({'recommendations': recommendations})
-
 
 
 class CalendarReminderView(generics.GenericAPIView):
@@ -138,4 +140,3 @@ class CalendarReminderView(generics.GenericAPIView):
 
         event = create_calendar_event(summary, start_time, end_time)
         return Response({'event_id': event.get('id')})
-
