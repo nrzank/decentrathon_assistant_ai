@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ассистент</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h1 class="text-center">Ассистент</h1>
+            <div id="chat-window" class="border p-3 mb-3" style="height: 400px; overflow-y: auto;">
+                <!-- Чат сообщения будут добавляться здесь -->
+            </div>
+            <form id="search-form">
+                <div class="input-group">
+                    <input type="text" id="search-input" class="form-control" placeholder="Задайте вопрос...">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Отправить</button>
+                    </div>
+                </div>
+            </form>
+            <h5 class="mt-4">История поиска</h5>
+            <ul id="search-history" class="list-group">
+                <!-- История поиска будет добавляться здесь -->
+            </ul>
+            <h5 class="mt-4">Предметы</h5>
+            <ul class="list-group">
+                <li class="list-group-item">Математика</li>
+                <li class="list-group-item">Физика</li>
+                <li class="list-group-item">Программирование</li>
+                <li class="list-group-item">История</li>
+                <li class="list-group-item">Литература</li>
+                <li class="list-group-item">География</li>
+                <li class="list-group-item">Без категории</li>
+            </ul>
+            <div class="mt-4">
+                <a href="/login" class="btn btn-link">Вход в личный кабинет</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="{% static 'js/assistant.js' %}"></script>
+</body>
+</html>
